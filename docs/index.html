@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>MediaTrack Docs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <!-- 本地资源（不依赖外网 CDN） -->
+  <link rel="stylesheet" href="assets/vue.css">
+</head>
+<body>
+  <div id="app">加载中…</div>
+  <script>
+    window.$docsify = {
+      // 站点名（左上角显示）
+      name: '📚 MediaTrack Docs',
+      // 加载 _sidebar.md 作为侧边栏
+      loadSidebar: true,
+      // 自动回到顶部
+      auto2top: true,
+      // 目录最大层级
+      maxLevel: 3,
+      // 全文搜索（依赖 search 插件）
+      search: {
+        placeholder: '搜索',
+        noData: '没有找到结果',
+        depth: 3
+      },
+      // 不显示 GitHub 角标
+      repo: ''
+    }
+  </script>
+  <!-- docsify v4 核心 + 搜索插件（本地化） -->
+  <script src="assets/docsify.min.js"></script>
+  <script src="assets/search.min.js"></script>
+</body>
+</html>

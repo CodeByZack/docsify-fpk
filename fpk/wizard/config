@@ -1,0 +1,19 @@
+[{
+  "stepTitle": "配置 Docsify 文档站",
+  "items": [{
+    "type": "tips",
+    "helpText": "修改后保存即自动重启服务生效。注意：桌面图标的端口固定为 6666；若端口改为其他值，6666 空闲时图标会自动跳转到新端口，若 6666 被占用则请直接用浏览器访问 http://NAS:新端口。"
+  }, {
+    "type": "text",
+    "field": "port",
+    "label": "服务端口（默认 6666）",
+    "initValue": "6666",
+    "rules": [{ "pattern": "^[0-9]{2,5}$", "message": "请输入 2-5 位数字端口" }]
+  }, {
+    "type": "text",
+    "field": "docs_path",
+    "label": "文档目录（留空使用应用共享目录）",
+    "initValue": "",
+    "rules": [{ "pattern": "^$|^\\/", "message": "请输入绝对路径（以 / 开头），或留空" }]
+  }]
+}]

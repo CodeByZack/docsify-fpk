@@ -1,0 +1,7 @@
+[{
+  "stepTitle": "升级 Docsify 文档站",
+  "items": [{
+    "type": "tips",
+    "helpText": "升级仅替换应用程序文件，文档目录与端口配置全部保留。"
+  }]
+}]

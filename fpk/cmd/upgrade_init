@@ -1,0 +1,3 @@
+#!/bin/bash
+# 升级前：无动作（文档与配置在 var/ 与 shares/ 下，升级保留）
+exit 0

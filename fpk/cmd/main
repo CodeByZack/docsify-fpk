@@ -1,0 +1,128 @@
+#!/bin/bash
+# Docsify 文档站 (docsify-fpk) — fnOS 应用生命周期脚本
+# 由飞牛应用中心调用：start / stop / status
+#
+# 布局：
+#   app/       → 安装后 target/（TRIM_APPDEST）：server.js + seed-docs + ui/
+#   var/       → TRIM_PKGVAR：docsify.conf（端口/文档目录配置）+ 日志 + PID
+#   shares/    → 应用共享目录（默认文档目录）：shares/docs
+#
+# 配置项（由 install_callback / config_callback 写入 docsify.conf）：
+#   PORT=6666            服务端口（向导可填，默认 6666）
+#   DOCS_PATH=           文档目录（向导可填，默认共享目录 shares/docs）
+
+LOG_FILE="${TRIM_PKGVAR}/docsify.log"
+PID_FILE="${TRIM_PKGVAR}/docsify.pid"
+CONF_FILE="${TRIM_PKGVAR}/docsify.conf"
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+APP_DIR="${TRIM_APPDEST:-$(CDPATH= cd -- "${SCRIPT_DIR}/.." && pwd)}"
+NODE_BIN="/var/apps/nodejs_v24/target/bin/node"
+SHARES_DOCS="/var/apps/${TRIM_APPNAME:-docsify-fpk}/shares/docs"
+SEED_DIR="${APP_DIR}/seed-docs"
+
+# ---- 读取配置（不存在则用默认值）----
+PORT=6666
+DOCS_PATH=""
+if [ -f "${CONF_FILE}" ]; then
+    # shellcheck disable=SC1090
+    . "${CONF_FILE}" 2>/dev/null || true
+fi
+PORT="${PORT:-6666}"
+DOCS_PATH="${DOCS_PATH:-${SHARES_DOCS}}"
+
+log_msg() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "${LOG_FILE}"
+}
+
+check_process() {
+    local pid="$1"
+    [ -n "${pid}" ] && kill -0 "${pid}" 2>/dev/null
+}
+
+status() {
+    if [ -r "${PID_FILE}" ]; then
+        local pid
+        pid=$(head -n 1 "${PID_FILE}" | tr -d '[:space:]')
+        if check_process "${pid}"; then
+            return 0
+        fi
+        rm -f "${PID_FILE}"
+    fi
+    return 3
+}
+
+start_process() {
+    if status; then
+        return 0
+    fi
+
+    if [ ! -x "${NODE_BIN}" ]; then
+        echo "未找到 Node.js 运行时（${NODE_BIN}），请确认已安装 nodejs_v24 应用。" > "${TRIM_TEMP_LOGFILE}"
+        return 1
+    fi
+
+    # 文档目录不存在则创建；无 index.html 时从 seed 种入初始文档（不覆盖已有内容）
+    mkdir -p "${DOCS_PATH}" 2>/dev/null || true
+    if [ ! -f "${DOCS_PATH}/index.html" ] && [ -f "${SEED_DIR}/index.html" ]; then
+        log_msg "Seeding initial docs to ${DOCS_PATH}"
+        cp -a "${SEED_DIR}/." "${DOCS_PATH}/" 2>/dev/null || true
+    fi
+
+    log_msg "Starting docsify (port=${PORT}, docs=${DOCS_PATH}) ..."
+    cd "${APP_DIR}"
+    DOCSIFY_PORT="${PORT}" DOCSIFY_DOCS_PATH="${DOCS_PATH}" \
+        "${NODE_BIN}" "${APP_DIR}/server.js" >> "${LOG_FILE}" 2>&1 &
+    printf "%s" "$!" > "${PID_FILE}"
+
+    # 等 1.5s 确认进程存活（端口被占等启动失败会在日志留下错误）
+    sleep 1.5
+    if ! status; then
+        log_msg "Start failed (see log tail below)"
+        log_msg "$(tail -n 5 "${LOG_FILE}" 2>/dev/null)"
+        echo "启动失败！请查看应用日志：${LOG_FILE}" > "${TRIM_TEMP_LOGFILE}"
+        rm -f "${PID_FILE}"
+        return 1
+    fi
+    return 0
+}
+
+stop_process() {
+    log_msg "Stopping docsify ..."
+    if [ -r "${PID_FILE}" ]; then
+        local pid
+        pid=$(head -n 1 "${PID_FILE}" | tr -d '[:space:]')
+        if check_process "${pid}"; then
+            kill "${pid}" 2>/dev/null
+            sleep 1
+            check_process "${pid}" && kill -9 "${pid}" 2>/dev/null
+        fi
+        rm -f "${PID_FILE}"
+    fi
+    return 0
+}
+
+case "$1" in
+    start)
+        start_process
+        exit $?
+        ;;
+    stop)
+        stop_process
+        exit $?
+        ;;
+    status)
+        status
+        exit $?
+        ;;
+    restart)
+        stop_process
+        sleep 1
+        start_process
+        exit $?
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|restart}" >&2
+        exit 1
+        ;;
+esac

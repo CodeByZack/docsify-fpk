@@ -1,0 +1,19 @@
+[{
+  "stepTitle": "安装 Docsify 文档站",
+  "items": [{
+    "type": "tips",
+    "helpText": "轻量静态文档站：文档就是 md 文件，放进文档目录即发布（支持 docsify 全部主题/插件配置，改 index.html 即可）。安装后桌面出现图标，点开即用。"
+  }, {
+    "type": "text",
+    "field": "port",
+    "label": "服务端口（默认 6666）",
+    "initValue": "6666",
+    "rules": [{ "pattern": "^[0-9]{2,5}$", "message": "请输入 2-5 位数字端口" }]
+  }, {
+    "type": "text",
+    "field": "docs_path",
+    "label": "文档目录（留空使用应用共享目录，可在飞牛文件管理器查看）",
+    "initValue": "",
+    "rules": [{ "pattern": "^$|^\\/", "message": "请输入绝对路径（以 / 开头），或留空" }]
+  }]
+}]

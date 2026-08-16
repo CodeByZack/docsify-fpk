@@ -1,0 +1,13 @@
+{
+    ".url": {
+        "docsify-fpk.Application": {
+            "title": "Docsify 文档站",
+            "icon": "images/icon_{0}.png",
+            "type": "iframe",
+            "protocol": "http",
+            "port": "6666",
+            "url": "/",
+            "allUsers": true
+        }
+    }
+}

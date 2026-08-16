@@ -1,0 +1,8 @@
+# 打包产物
+fpk/dist/
+fpk/app/seed-docs/
+*.fpk
+
+# 系统
+.DS_Store
+Thumbs.db

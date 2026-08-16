@@ -1,0 +1,14 @@
+appname                    = docsify-fpk
+version                    = 1.0.0
+display_name               = Docsify 文档站
+desc                       = 基于 docsify 的轻量静态文档站：文档就是 md 文件，丢进文档目录即发布。安装时可指定文档目录与服务端口，装完在应用中心可随时改。点开桌面图标即用。
+platform                   = all
+source                     = thirdparty
+maintainer                 = CodeByZack
+distributor                = CodeByZack
+desktop_uidir              = ui
+desktop_applaunchname      = docsify-fpk.Application
+checkport                  = false
+service_port               = 6666
+ctl_stop                   = true
+install_dep_apps           = nodejs_v24

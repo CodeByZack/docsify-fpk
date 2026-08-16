@@ -1,0 +1,60 @@
+name: Build FPK
+
+# 轻量打包：docsify 纯静态 + node 内置模块，无原生依赖、无符号链接，
+# platform=all 一个 fpk 通吃 arm/x86，单 job 即可。
+#
+# 触发方式：
+#   - 自动：push tag v*（产物同时挂到 GitHub Release）
+#   - 自动：push main（产物作为 artifact 供下载验证）
+#   - 手动：workflow_dispatch
+#
+# 注意：
+#   - fnpack 固定 1.2.0 并校验 sha256（1.2.1 会把符号链接改写为死链导致 fnOS
+#     安装器报 10234 装不上；本项目虽无符号链接，仍固定版本保证可复现）。
+#   - fnpack 官方二进制：https://static2.fnnas.com/fnpack/fnpack-<ver>-linux-<amd64|arm64>
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FNPACK_VERSION: "1.2.0"
+
+jobs:
+  build:
+    name: Build FPK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install fnpack 1.2.0 (amd64)
+        run: |
+          curl -fsSL -o /tmp/fnpack "https://static2.fnnas.com/fnpack/fnpack-${FNPACK_VERSION}-linux-amd64"
+          echo "523227c950a589ab3af327cf91c45511154265487bf723b29da9cfa2e0dc9d5a  /tmp/fnpack" | sha256sum -c -
+          sudo mv /tmp/fnpack /usr/local/bin/fnpack
+          sudo chmod +x /usr/local/bin/fnpack
+
+      - name: Build fpk
+        run: ./fpk/build-fpk.sh
+
+      - name: Upload fpk artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docsify-fpk
+          path: fpk/dist/*.fpk
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: fpk/dist/*.fpk
+          generate_release_notes: true
