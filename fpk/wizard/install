@@ -2,18 +2,21 @@
   "stepTitle": "安装 Docsify 文档站",
   "items": [{
     "type": "tips",
-    "helpText": "轻量静态文档站：文档就是 md 文件，放进文档目录即发布（支持 docsify 全部主题/插件配置，改 index.html 即可）。安装后桌面出现图标，点开即用。"
+    "helpText": "轻量静态文档站：文档就是 md 文件，放进文档目录即发布。安装后桌面出现图标，点开即用。"
   }, {
     "type": "text",
-    "field": "port",
+    "field": "wizard_port",
     "label": "服务端口（默认 8666）",
     "initValue": "8666",
     "rules": [{ "pattern": "^[0-9]{2,5}$", "message": "请输入 2-5 位数字端口" }]
   }, {
     "type": "text",
-    "field": "docs_path",
-    "label": "文档目录（留空使用应用共享目录，可在飞牛文件管理器查看）",
+    "field": "wizard_docs_path",
+    "label": "文档目录",
     "initValue": "",
     "rules": [{ "pattern": "^$|^\\/", "message": "请输入绝对路径（以 / 开头），或留空" }]
+  }, {
+    "type": "tips",
+    "helpText": "留空 = 使用应用共享目录（推荐，免授权）。若填写外部目录（如 /vol1/1000/docs），请先到「应用中心 → 本应用 → 设置 → 目录授权」添加该目录的访问权限，否则应用无法读取文档。"
   }]
 }]

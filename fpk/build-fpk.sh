@@ -12,7 +12,8 @@
 #
 # 前置条件：
 #   - fnpack 1.2.0（/usr/local/bin/fnpack；CI 从 static2.fnnas.com 下载并校验 sha256）
-#   - 源文档在项目 docs/ 目录（打包时复制为 app/seed-docs，安装时种入文档目录）
+#   - 源文档在项目 docs/ 目录（打包时复制为 app/seed-docs，作为引擎模板：
+#     index.html/assets 等由 server.js 虚拟补全到文档目录，不写盘）
 #
 # 注意：
 #   - 官方 fnpack 的 manifest platform 仅支持 x86|arm|loongarch|risc-v（无 all），

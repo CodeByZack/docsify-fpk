@@ -1,13 +1,14 @@
 #!/bin/bash
 # 安装后：把向导填写的 端口/文档目录 写入配置，并种入初始文档
-# 向导字段以环境变量形式传入：wizard_port / wizard_docs_path
-
-PORT="${wizard_port:-8666}"
-DOCS_PATH="${wizard_docs_path:-}"
-
-# 未填文档目录 → 默认应用共享目录（config/resource 声明，安装时自动创建）
+# 向导字段以环境变量形式传入。兼容两种命名（防御 fnOS 是否自动加 wizard_ 前缀）：
+#   wizard_port / wizard_docs_path
+#   port / docs_path
+PORT="${wizard_port:-${port:-8666}}"
+# 文档目录：留空 = 应用共享目录（config/resource 声明，安装时自动创建）
+# 填写 = 外部目录（用户需先在应用设置 → 目录授权中添加访问权限）
+DOCS_PATH="${wizard_docs_path:-${docs_path:-}}"
 if [ -z "${DOCS_PATH}" ]; then
-    DOCS_PATH="/var/apps/${TRIM_APPNAME}/shares/docs"
+    DOCS_PATH="/var/apps/${TRIM_APPNAME}/shares/docsify-docs"
 fi
 
 # 校验端口（防御：向导已校验，这里兜底）
@@ -15,15 +16,13 @@ case "${PORT}" in
     ''|*[!0-9]*) PORT=8666 ;;
 esac
 
-mkdir -p "${TRIM_PKGVAR}" "${DOCS_PATH}"
+mkdir -p "${TRIM_PKGVAR}" "${DOCS_PATH}" 2>/dev/null || true
 cat > "${TRIM_PKGVAR}/docsify.conf" <<EOF
 PORT=${PORT}
 DOCS_PATH=${DOCS_PATH}
 EOF
 
-# 首次安装：文档目录无 index.html 时种入 seed（不覆盖用户已有内容）
-if [ ! -f "${DOCS_PATH}/index.html" ] && [ -f "${TRIM_APPDEST}/seed-docs/index.html" ]; then
-    cp -a "${TRIM_APPDEST}/seed-docs/." "${DOCS_PATH}/"
-fi
+# 注意：不再向文档目录种入引擎文件（index.html/assets 由 server.js 从内置模板自动补全），
+# 用户文档目录只需放 .md 文档。
 
 exit 0

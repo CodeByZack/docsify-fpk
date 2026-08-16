@@ -3,13 +3,13 @@
 # 由飞牛应用中心调用：start / stop / status
 #
 # 布局：
-#   app/       → 安装后 target/（TRIM_APPDEST）：server.js + seed-docs + ui/
+#   app/       → 安装后 target/（TRIM_APPDEST）：server.js + seed-docs（引擎模板）+ ui/
 #   var/       → TRIM_PKGVAR：docsify.conf（端口/文档目录配置）+ 日志 + PID
-#   shares/    → 应用共享目录（默认文档目录）：shares/docs
+#   shares/    → 应用共享目录：shares/docsify-docs（默认文档目录，也可作为附加文档源）
 #
 # 配置项（由 install_callback / config_callback 写入 docsify.conf）：
 #   PORT=8666            服务端口（向导可填，默认 8666）
-#   DOCS_PATH=           文档目录（向导可填，默认共享目录 shares/docs）
+#   DOCS_PATH=           文档目录（向导可填，默认共享目录 shares/docsify-docs）
 
 LOG_FILE="${TRIM_PKGVAR}/docsify.log"
 PID_FILE="${TRIM_PKGVAR}/docsify.pid"
@@ -18,7 +18,7 @@ CONF_FILE="${TRIM_PKGVAR}/docsify.conf"
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 APP_DIR="${TRIM_APPDEST:-$(CDPATH= cd -- "${SCRIPT_DIR}/.." && pwd)}"
 NODE_BIN="/var/apps/nodejs_v24/target/bin/node"
-SHARES_DOCS="/var/apps/${TRIM_APPNAME:-docsify-fpk}/shares/docs"
+SHARES_DOCS="/var/apps/${TRIM_APPNAME:-docsify-fpk}/shares/docsify-docs"
 SEED_DIR="${APP_DIR}/seed-docs"
 
 # ---- 读取配置（不存在则用默认值）----
@@ -62,16 +62,29 @@ start_process() {
         return 1
     fi
 
-    # 文档目录不存在则创建；无 index.html 时从 seed 种入初始文档（不覆盖已有内容）
+    # 文档目录不存在则创建（文档目录本身只放 .md，引擎文件由内置模板虚拟补全）
     mkdir -p "${DOCS_PATH}" 2>/dev/null || true
-    if [ ! -f "${DOCS_PATH}/index.html" ] && [ -f "${SEED_DIR}/index.html" ]; then
-        log_msg "Seeding initial docs to ${DOCS_PATH}"
-        cp -a "${SEED_DIR}/." "${DOCS_PATH}/" 2>/dev/null || true
+
+    # 附加文档目录：配置的文档目录 ≠ 共享目录时，共享目录也作为文档源伺服
+    # （两边拖 .md 都生效，侧边栏自动合并；共享目录文档在 /shared/ 前缀下）
+    ADDITIONAL_DOCS=""
+    ADDITIONAL_LABELS=""
+    RESOLVED_DOCS="$(readlink -f "${DOCS_PATH}" 2>/dev/null || echo "${DOCS_PATH}")"
+    RESOLVED_SHARES="$(readlink -f "${SHARES_DOCS}" 2>/dev/null || echo "${SHARES_DOCS}")"
+    if [ "${RESOLVED_DOCS}" != "${RESOLVED_SHARES}" ] && [ -d "${SHARES_DOCS}" ]; then
+        ADDITIONAL_DOCS="${SHARES_DOCS}"
+        ADDITIONAL_LABELS="应用共享目录"
     fi
 
-    log_msg "Starting docsify (port=${PORT}, docs=${DOCS_PATH}) ..."
+    log_msg "Starting docsify (port=${PORT}, docs=${DOCS_PATH}, additional=${ADDITIONAL_DOCS:-none}) ..."
     cd "${APP_DIR}"
+    # 把系统授权的可访问目录（应用设置→目录授权）透传给 server.js 做启动校验
     DOCSIFY_PORT="${PORT}" DOCSIFY_DOCS_PATH="${DOCS_PATH}" \
+    DOCSIFY_DOCS_LABEL="主文档目录" \
+    DOCSIFY_ADDITIONAL_DOCS="${ADDITIONAL_DOCS}" \
+    DOCSIFY_ADDITIONAL_LABELS="${ADDITIONAL_LABELS}" \
+    DOCSIFY_SEED_DIR="${SEED_DIR}" \
+    DOCSIFY_ACCESSIBLE_PATHS="${TRIM_DATA_ACCESSIBLE_PATHS:-}" \
         "${NODE_BIN}" "${APP_DIR}/server.js" >> "${LOG_FILE}" 2>&1 &
     printf "%s" "$!" > "${PID_FILE}"
 

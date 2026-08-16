@@ -6,10 +6,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <!-- 本地资源（不依赖外网 CDN） -->
-  <link rel="stylesheet" href="assets/vue.css">
+  <!-- Core Theme（docsify 5 基础主题，CSS 变量驱动） -->
+  <link rel="stylesheet" href="assets/core.min.css">
+  <!-- Prism 代码高亮：浅色主题（默认） -->
+  <link rel="stylesheet" href="assets/prism.css" id="prism-light">
+  <!-- Prism 代码高亮：暗色主题（主题切换时启用） -->
+  <link rel="stylesheet" href="assets/prism-tomorrow.min.css" id="prism-dark" disabled>
+  <!-- Core Dark add-on：跟随系统亮暗（prefers-color-scheme 生效） -->
+  <link rel="stylesheet" href="assets/core-dark.min.css" media="(prefers-color-scheme: dark)" data-sheet="core-dark-auto">
+  <!-- Core Dark add-on：手动切换（默认禁用，点右上角按钮启用） -->
+  <link rel="stylesheet" href="assets/core-dark.min.css" data-sheet="core-dark" disabled>
+  <style>
+    /* 亮暗切换按钮 */
+    #theme-toggle {
+      position: fixed;
+      top: 12px;
+      right: 16px;
+      z-index: 9999;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+      transition: background 0.2s, color 0.2s;
+    }
+    #theme-toggle:hover { opacity: 0.85; }
+  </style>
 </head>
-<body>
+<body class="loading">
   <div id="app">加载中…</div>
+  <button id="theme-toggle" title="切换亮暗主题" aria-label="切换亮暗主题">🌓</button>
   <script>
     window.$docsify = {
       // 站点名（左上角显示）
@@ -30,8 +64,59 @@
       repo: ''
     }
   </script>
-  <!-- docsify v4 核心 + 搜索插件（本地化） -->
+  <!-- docsify v5 核心 + 搜索插件（本地化） -->
   <script src="assets/docsify.min.js"></script>
   <script src="assets/search.min.js"></script>
+  <!-- 额外代码语言高亮（docsify v5 内置基础语言，其余按需引入） -->
+  <script src="assets/prism-bash.min.js"></script>
+  <script src="assets/prism-markdown.min.js"></script>
+  <script src="assets/prism-yaml.min.js"></script>
+  <script src="assets/prism-python.min.js"></script>
+  <script src="assets/prism-typescript.min.js"></script>
+  <!-- 亮暗主题切换：auto（跟随系统）→ light → dark → auto -->
+  <script>
+    (function () {
+      var KEY = 'docsify-theme'; // 'auto' | 'light' | 'dark'
+      var autoSheet = document.querySelector('link[data-sheet="core-dark-auto"]');
+      var manualSheet = document.querySelector('link[data-sheet="core-dark"]');
+      var prismLight = document.getElementById('prism-light');
+      var prismDark = document.getElementById('prism-dark');
+      var btn = document.getElementById('theme-toggle');
+      var ICONS = { auto: '🌓', light: '☀️', dark: '🌙' };
+
+      function systemDark() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      function apply() {
+        var mode = localStorage.getItem(KEY) || 'auto';
+        var dark = mode === 'dark' || (mode === 'auto' && systemDark());
+        // auto：让系统 media 生效；light/dark：显式禁用/启用
+        autoSheet.disabled = mode === 'light' || mode === 'dark';
+        manualSheet.disabled = mode !== 'dark';
+        // 代码高亮主题跟随实际亮暗
+        prismLight.disabled = dark;
+        prismDark.disabled = !dark;
+        btn.textContent = ICONS[mode];
+        btn.title = mode === 'auto' ? '亮暗：跟随系统' : mode === 'dark' ? '亮暗：暗色' : '亮暗：浅色';
+      }
+
+      btn.addEventListener('click', function () {
+        var mode = localStorage.getItem(KEY) || 'auto';
+        var next = mode === 'auto' ? 'light' : mode === 'light' ? 'dark' : 'auto';
+        localStorage.setItem(KEY, next);
+        apply();
+      });
+
+      // 跟随系统模式下，系统亮暗变化时实时切换
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+          if ((localStorage.getItem(KEY) || 'auto') === 'auto') apply();
+        });
+      }
+
+      apply();
+    })();
+  </script>
 </body>
 </html>

@@ -2,6 +2,11 @@
   "stepTitle": "卸载 Docsify 文档站",
   "items": [{
     "type": "tips",
-    "helpText": "卸载将停止服务并删除应用文件。文档目录（共享目录/自定义目录）中的文档会保留，不会删除。"
+    "helpText": "卸载将停止服务并删除应用文件。文档默认保留；如需一并删除文档数据，请勾选下方选项。"
+  }, {
+    "type": "checkbox",
+    "field": "delete_data",
+    "label": "删除文档数据",
+    "options": [{ "label": "同时删除应用共享文档目录（shares/docsify-docs）中的文档。自定义目录（如 /vol1/1000/docs）是您自己的文件，不会被删除。", "value": "delete" }]
   }]
 }]

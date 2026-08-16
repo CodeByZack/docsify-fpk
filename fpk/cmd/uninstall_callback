@@ -1,3 +1,10 @@
 #!/bin/bash
-# 卸载后：无额外动作。文档目录（shares/docs 或自定义目录）由系统保留。
+# 卸载后：
+#   - 默认行为：保留文档数据（fnOS 平台也保留 var/shares，保护用户数据）
+#   - 卸载向导勾选"同时删除文档数据"（wizard_delete_data 非空）：删除应用共享
+#     文档目录（shares/docsify-docs）。
+#     注意：自定义目录（如 /vol1/1000/docs）是用户自己的文件，永远不删除。
+if [ -n "${wizard_delete_data:-}" ]; then
+    rm -rf "/var/apps/${TRIM_APPNAME:-docsify-fpk}/shares/docsify-docs" 2>/dev/null || true
+fi
 exit 0
