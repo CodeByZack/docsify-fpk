@@ -18,7 +18,7 @@
 #   - 官方 fnpack 的 manifest platform 仅支持 x86|arm|loongarch|risc-v（无 all），
 #     本应用纯静态 + node 内置模块，无原生依赖、无符号链接，arm/x86 各打一份即可。
 #   - 官方 fnpack（1.2.0/1.2.1 均如此）会把符号链接改写为指向自身的死链，导致 fnOS
-#     安装器报 10234 装不上；本项目无符号链接，但若未来引入请先消除（参考 mediary-scout）。
+#     安装器报 10234 装不上；本项目无符号链接，若未来引入符号链接请先消除再打包。
 set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"

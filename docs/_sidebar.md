@@ -1,2 +1,3 @@
 - [首页](/)
-- [调研文档](/mediary-scout-agent-token-optimization.md)
+- [快速开始](/README.md)
+- [使用指南](/guide.md)
