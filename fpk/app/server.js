@@ -200,6 +200,7 @@ function send404(res) {
  *  - index.html（docsify 壳，目录入口）
  *  - README.md（欢迎/首页）
  *  - assets/*（docsify 运行时库：js/css 等）
+ * 引擎文件（index.html / assets/*）只从应用内置 seed 伺服，文档目录的同名文件不生效。
  */
 function seedFallback(root, fp) {
   const rel = path.relative(root, fp);
@@ -218,8 +219,33 @@ function seedFallback(root, fp) {
   return null;
 }
 
-/** 伺服文件；文档目录缺失时尝试从内置模板补全 */
+/** 引擎文件（docsify 运行时）：index.html 与 assets/*，统一由应用内置模板提供 */
+function isEngineFile(rel) {
+  return rel === 'index.html' || rel.startsWith('assets' + path.sep);
+}
+
+/**
+ * 伺服文件：
+ *  - 引擎文件（index.html / assets/*）→ 只从内置模板伺服（不读文档目录）
+ *  - 其他文件（.md 等）→ 文档目录优先，缺失时尝试从内置模板补全（README.md）
+ */
 function serveFileWithFallback(root, fp, res) {
+  const rel = path.relative(root, fp);
+  if (isEngineFile(rel)) {
+    const seed = seedFallback(root, fp);
+    if (seed) {
+      fs.readFile(seed, (err2, data2) => {
+        if (!err2) {
+          sendFile(seed, data2, res);
+          return;
+        }
+        send404(res);
+      });
+      return;
+    }
+    send404(res);
+    return;
+  }
   fs.readFile(fp, (err, data) => {
     if (!err) {
       sendFile(fp, data, res);
@@ -425,15 +451,8 @@ const server = http.createServer((req, res) => {
   }
   fs.stat(target.fp, (err, st) => {
     if (!err && st.isDirectory()) {
-      // 目录：优先伺服目录内 index.html；没有则用内置模板（目录只需放 .md）
-      const idx = path.join(target.fp, 'index.html');
-      fs.stat(idx, (err2) => {
-        if (err2) {
-          serveFileWithFallback(target.root, path.join(SEED_DIR, 'index.html'), res);
-        } else {
-          serveFileWithFallback(target.root, idx, res);
-        }
-      });
+      // 目录：直接用内置模板 index.html（引擎文件统一由应用提供，不读文档目录）
+      serveFileWithFallback(target.root, path.join(SEED_DIR, 'index.html'), res);
       return;
     }
     serveFileWithFallback(target.root, target.fp, res);
