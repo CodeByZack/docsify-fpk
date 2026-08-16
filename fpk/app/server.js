@@ -3,14 +3,14 @@
  * Docsify 静态文档服务器（零依赖，仅 Node 内置模块）
  *
  * 由 cmd/main 以环境变量启动：
- *   DOCSIFY_PORT      服务端口（默认 6666，来自应用配置）
+ *   DOCSIFY_PORT      服务端口（默认 8666，来自应用配置）
  *   DOCSIFY_DOCS_PATH 文档目录（来自应用配置）
  *
  * 特性：
  *  - 静态文件伺服（docsify 是纯前端，hash 路由无需 history 回退）
  *  - 目录穿越防护
- *  - 端口 ≠ 6666 时，若 6666 空闲则额外监听并 302 跳转到实际端口，
- *    保证桌面图标（固定指向 6666）仍然可用；6666 被占用则跳过。
+ *  - 端口 ≠ 8666 时，若 8666 空闲则额外监听并 302 跳转到实际端口，
+ *    保证桌面图标（固定指向 8666）仍然可用；8666 被占用则跳过。
  */
 'use strict';
 
@@ -18,9 +18,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = parseInt(process.env.DOCSIFY_PORT || '6666', 10);
+const PORT = parseInt(process.env.DOCSIFY_PORT || '8666', 10);
 const DOCS_PATH = process.env.DOCSIFY_DOCS_PATH || path.join(__dirname, 'seed-docs');
-const ICON_PORT = 6666;
+const ICON_PORT = 8666;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -108,7 +108,7 @@ server.on('error', (e) => {
 server.listen(PORT, '0.0.0.0', () => {
   log(`serving ${DOCS_PATH} on port ${PORT}`);
 
-  // 桌面图标固定指向 6666：端口不同且 6666 空闲时，额外监听并 302 跳转
+  // 桌面图标固定指向 8666：端口不同且 8666 空闲时，额外监听并 302 跳转
   if (PORT !== ICON_PORT) {
     const redirect = http.createServer((req, res) => {
       const host = (req.headers.host || 'localhost').split(':')[0];

@@ -8,7 +8,7 @@
 #   shares/    → 应用共享目录（默认文档目录）：shares/docs
 #
 # 配置项（由 install_callback / config_callback 写入 docsify.conf）：
-#   PORT=6666            服务端口（向导可填，默认 6666）
+#   PORT=8666            服务端口（向导可填，默认 8666）
 #   DOCS_PATH=           文档目录（向导可填，默认共享目录 shares/docs）
 
 LOG_FILE="${TRIM_PKGVAR}/docsify.log"
@@ -22,13 +22,13 @@ SHARES_DOCS="/var/apps/${TRIM_APPNAME:-docsify-fpk}/shares/docs"
 SEED_DIR="${APP_DIR}/seed-docs"
 
 # ---- 读取配置（不存在则用默认值）----
-PORT=6666
+PORT=8666
 DOCS_PATH=""
 if [ -f "${CONF_FILE}" ]; then
     # shellcheck disable=SC1090
     . "${CONF_FILE}" 2>/dev/null || true
 fi
-PORT="${PORT:-6666}"
+PORT="${PORT:-8666}"
 DOCS_PATH="${DOCS_PATH:-${SHARES_DOCS}}"
 
 log_msg() {

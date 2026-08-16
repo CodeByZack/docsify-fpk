@@ -5,7 +5,16 @@
             "icon": "images/icon_{0}.png",
             "type": "iframe",
             "protocol": "http",
-            "port": "6666",
+            "port": "8666",
+            "url": "/",
+            "allUsers": true
+        },
+        "docsify-fpk.Browser": {
+            "title": "Docsify 文档站（新标签页）",
+            "icon": "images/icon_{0}.png",
+            "type": "url",
+            "protocol": "http",
+            "port": "8666",
             "url": "/",
             "allUsers": true
         }

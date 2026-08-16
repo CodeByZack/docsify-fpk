@@ -6,8 +6,8 @@
   }, {
     "type": "text",
     "field": "port",
-    "label": "服务端口（默认 6666）",
-    "initValue": "6666",
+    "label": "服务端口（默认 8666）",
+    "initValue": "8666",
     "rules": [{ "pattern": "^[0-9]{2,5}$", "message": "请输入 2-5 位数字端口" }]
   }, {
     "type": "text",
