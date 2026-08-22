@@ -53,6 +53,12 @@ markmap:
 ## 项目 C
 </script>
 
+## 交互
+
+- **拖动**：按住画布拖拽即可平移整棵导图
+- **缩放**：滚轮（或触控板捏合）
+- **全屏**：右上角 ⛶ 按钮进入全屏浏览，再点一次或按 Esc 退出
+
 ## 说明
 
 - **写法**：推荐裸 `<script type="text/template">`（markdown 原样保留、空行安全）；
@@ -61,4 +67,5 @@ markmap:
 - 高度：默认 320px，可用 `data-height="480"`（px）覆盖，写在 script 或外层 div 上均可
 - 配置：支持 markmap 的 frontmatter 参数（`initialExpandLevel`、`colorFreezeLevel`、
   `maxWidth` 等）
+- **主题**：文字/圆点/代码块颜色跟随站内亮暗主题（🌓 手动切换即时生效）
 - 渲染失败时会在原位置显示错误提示，不影响页面其他内容
