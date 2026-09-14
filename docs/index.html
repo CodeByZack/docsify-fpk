@@ -62,9 +62,6 @@
       },
       // 不显示 GitHub 角标
       repo: '',
-      // .html/.htm 链接不转换 hash 路由、自动 target="_blank"：
-      // 避免 docsify 把 .html 文件当 markdown 渲染（<style> 污染整页）
-      noCompileLinks: ['.*\\.html?$'],
       plugins: [
         {
           install(hook, vm) {
