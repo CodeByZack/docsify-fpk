@@ -61,7 +61,10 @@
         depth: 3
       },
       // 不显示 GitHub 角标
-      repo: ''
+      repo: '',
+      // .html/.htm 链接不转换 hash 路由、自动 target="_blank"：
+      // 避免 docsify 把 .html 文件当 markdown 渲染（<style> 污染整页）
+      noCompileLinks: ['.*\\.html?$']
     }
   </script>
   <!-- docsify v5 核心 + 搜索插件（本地化） -->
@@ -119,28 +122,6 @@
       }
 
       apply();
-    })();
-  </script>
-  <!-- .html/.htm 链接在新标签页打开：docsify 默认会把它们当 markdown 渲染（<style> 块污染整页），
-       加 target="_blank" 后 docsify 不拦截，浏览器直接开整页。MutationObserver 兜底 sidebar 重渲染。 -->
-  <script>
-    (function () {
-      function fix(root) {
-        (root.querySelectorAll || function () { return document.querySelectorAll('a[href]'); })('a[href]').forEach(function (a) {
-          if (!/\.html?$/i.test(a.getAttribute('href') || '')) return;
-          if (a.getAttribute('target')) return;
-          a.setAttribute('target', '_blank');
-          a.setAttribute('rel', 'noopener');
-        });
-      }
-      if (document.readyState !== 'loading') fix(document);
-      else document.addEventListener('DOMContentLoaded', function () { fix(document); });
-      new MutationObserver(function (muts) {
-        muts.forEach(function (m) {
-          if (m.type !== 'childList') return;
-          m.addedNodes.forEach(function (n) { if (n.nodeType === 1) fix(n); });
-        });
-      }).observe(document.documentElement, { childList: true, subtree: true });
     })();
   </script>
 </body>
