@@ -64,7 +64,22 @@
       repo: '',
       // .html/.htm 链接不转换 hash 路由、自动 target="_blank"：
       // 避免 docsify 把 .html 文件当 markdown 渲染（<style> 污染整页）
-      noCompileLinks: ['.*\\.html?$']
+      noCompileLinks: ['.*\\.html?$'],
+      plugins: [
+        {
+          install(hook, vm) {
+            // .html 文件渲染成 iframe：iframe 有独立 document，<style> 完全隔离
+            hook.beforeEach((html) => {
+              if (!/^\s*<!DOCTYPE|^\s*<html/i.test(html)) return html;
+              var p = vm.route && vm.route.path || '';
+              var url = vm.router && vm.router.getFile ? vm.router.getFile(p) : p;
+              // onload 读 contentDocument.body.scrollHeight 自适应高度（同源 iframe 可读）
+              return '<iframe src="' + url + '" style="width:100%;height:calc(100vh - 180px);border:0;overflow:auto;" '
+                + 'onload="try{var h=this.contentDocument.body.scrollHeight+40;if(h>300)this.style.height=h+\'px\'}catch(e){}"></iframe>';
+            });
+          }
+        }
+      ]
     }
   </script>
   <!-- docsify v5 核心 + 搜索插件（本地化） -->
